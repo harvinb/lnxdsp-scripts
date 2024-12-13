@@ -1,0 +1,16 @@
+name: Trigegr build of lnxdsp-adi-meta
+
+on:
+  push:
+    branches:
+      - trigger_ci
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger build
+        run: gh workflow run build-project.yml --repo analogdevicesinc/lnxdsp-adi-meta --ref add_ci
+        env:
+          GH_TOKEN: ${{ github.token }}
