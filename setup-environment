@@ -49,6 +49,7 @@ Options:
     -d, --distro       Set the DISTRO name in the build configuration (default '${DISTRO_DEFAULT}')
     -s, --somrev       Set the SOM revision in the build configuration
     -c, --crrrev       Set the CRR revision in the build configuration
+    -u, --ucsdk        Add the UCSDK layer to the build configuration
 
 The first usage is for creating a new build directory. In this case, the
 script creates the build directory <BUILDDIR>, configures it for the
@@ -82,8 +83,8 @@ clean_up()
 }
 
 # get command line options
-SHORTOPTS="hm:b:d:s:c:"
-LONGOPTS="help,machine:,builddir:,distro:,somrev:,crrrev:"
+SHORTOPTS="hm:b:d:s:c:u"
+LONGOPTS="help,machine:,builddir:,distro:,somrev:,crrrev:,ucsdk"
 
 ARGS=$(getopt --options $SHORTOPTS --longoptions $LONGOPTS --name $PROGNAME -- "$@" )
 # Print the usage menu if invalid options are specified
@@ -99,6 +100,7 @@ USER_BUILDDIR=
 DISTRO=
 SOM_REV=
 CRR_REV=
+UCSDK=
 
 while true;
 do
@@ -109,6 +111,7 @@ do
         -d | --distro)     DISTRO="$2"; shift 2;;
         -s | --somrev)     SOM_REV="$2"; shift 2;;
         -c | --crrrev)     CRR_REV="$2"; shift 2;;
+        -u | --ucsdk)      UCSDK=true; shift 1;;
         -- )               shift; break ;;
         * )                break ;;
     esac
@@ -232,6 +235,10 @@ if [ "$build_dir_not_exist" = "true" ] || [ -n "$MACHINE" ]; then
     TEMPLATES="$CWD"/sources/base/"$MACHINE"
     cp "$TEMPLATES"/* conf/
     cp "$CWD"/sources/base/bblayers.conf conf/bblayers.conf
+    if [ $UCSDK ]; then
+        sed -e '/\s"$/i\  ${BSPDIR}/sources/meta-adi-sc5xx-ucsdk/meta-adi-sc5xx-ucsdk \\' \
+            -i conf/bblayers.conf
+    fi
     # Change settings according environment
     sed -e "s,MACHINE ?=.*,MACHINE ?= \"$MACHINE\",g" \
         -e "s,DISTRO ?=.*,DISTRO ?= \"$DISTRO\",g" \
