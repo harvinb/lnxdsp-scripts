@@ -166,32 +166,34 @@ fi
 
 # check whether the provided machine needs a SOM and CRR revision
 # if it exists, then -s and -c options must be provided. Update conf if provided
-if grep -wq 'SOM_REV' sources/meta-adi/meta-adi-adsp-sc5xx/conf/machine/"$MACHINE".conf ; then
-    if [ -z "$SOM_REV" ] ; then
-        echo "ERROR: SOM revision must be explicitly set for this machine."
-        clean_up
-        return 1
+if [ "$build_dir_not_exist" = "true" ] || [ -n "$MACHINE" ]; then
+    if grep -wq 'SOM_REV' sources/meta-adi/meta-adi-adsp-sc5xx/conf/machine/"$MACHINE".conf ; then
+        if [ -z "$SOM_REV" ] ; then
+            echo "ERROR: SOM revision must be explicitly set for this machine."
+            clean_up
+            return 1
+        fi
+    else
+        if [ -n "$SOM_REV" ]; then
+            echo "ERROR: SOM revision is not applicable to this machine."
+            clean_up
+            return 1
+        fi
     fi
-else
-    if [ -n "$SOM_REV" ]; then
-        echo "ERROR: SOM revision is not applicable to this machine."
-        clean_up
-        return 1
-    fi
-fi
 
 
-if grep -wq 'CRR_REV' sources/meta-adi/meta-adi-adsp-sc5xx/conf/machine/"$MACHINE".conf ; then
-    if [ -z "$CRR_REV" ] ; then
-        echo "ERROR: CRR revision must be explicitly set for this machine."
-        clean_up
-        return 1
-    fi
-else
-    if [ -n "$CRR_REV" ]; then
-        echo "ERROR: CRR revision is not applicable to this machine."
-        clean_up
-        return 1
+    if grep -wq 'CRR_REV' sources/meta-adi/meta-adi-adsp-sc5xx/conf/machine/"$MACHINE".conf ; then
+        if [ -z "$CRR_REV" ] ; then
+            echo "ERROR: CRR revision must be explicitly set for this machine."
+            clean_up
+            return 1
+        fi
+    else
+        if [ -n "$CRR_REV" ]; then
+            echo "ERROR: CRR revision is not applicable to this machine."
+            clean_up
+            return 1
+        fi
     fi
 fi
 
