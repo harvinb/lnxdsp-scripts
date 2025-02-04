@@ -84,7 +84,7 @@ clean_up()
 
 # get command line options
 SHORTOPTS="hm:b:d:s:c:u"
-LONGOPTS="help,machine:,builddir:,distro:,somrev:,crrrev:,ucsdk"
+LONGOPTS="help,machine:,builddir:,distro:,somrev:,crrrev:,ucsdk,dldir:,sstatedir:"
 
 ARGS=$(getopt --options $SHORTOPTS --longoptions $LONGOPTS --name $PROGNAME -- "$@" )
 # Print the usage menu if invalid options are specified
@@ -101,6 +101,8 @@ DISTRO=
 SOM_REV=
 CRR_REV=
 UCSDK=
+DLDIR=
+SSTATEDIR=
 
 while true;
 do
@@ -112,6 +114,8 @@ do
         -s | --somrev)     SOM_REV="$2"; shift 2;;
         -c | --crrrev)     CRR_REV="$2"; shift 2;;
         -u | --ucsdk)      UCSDK=true; shift 1;;
+             --dldir)      DLDIR="$2"; shift 2;;
+             --sstatedir)  SSTATEDIR="$2"; shift 2;;
         -- )               shift; break ;;
         * )                break ;;
     esac
@@ -207,8 +211,18 @@ if [ -n "$CRR_REV" ]; then
         -i sources/meta-adi/meta-adi-adsp-sc5xx/conf/machine/"$MACHINE".conf
 fi
 
-if [ ! -e "$CWD"/downloads ];then
+if [ -n "$DLDIR" ]; then
+    if [ ! -e "$DLDIR" ]; then
+        mkdir -p "$DLDIR"
+    fi
+elif [ ! -e "$CWD"/downloads ];then
 	mkdir "$CWD"/downloads
+fi
+
+if [ -n "$SSTATEDIR" ]; then
+    if [ ! -e "$SSTATEDIR" ]; then
+        mkdir -p "$SSTATEDIR"
+    fi
 fi
 
 OEROOT="$PWD"/sources/poky
@@ -244,6 +258,14 @@ if [ "$build_dir_not_exist" = "true" ] || [ -n "$MACHINE" ]; then
         -e "s,DISTRO ?=.*,DISTRO ?= \"$DISTRO\",g" \
         -e "s,DL_DIR ?=.*,DL_DIR ?= \"$CWD/downloads\",g" \
         -i conf/local.conf
+    if [ -n "$DLDIR" ]; then
+        sed -e "s,DL_DIR ?=.*,DL_DIR ?= \"$DLDIR\",g" \
+            -i conf/local.conf
+    fi
+    if [ -n "$SSTATEDIR" ]; then
+        sed -e "s,SSTATE_DIR ?=.*,SSTATE_DIR ?= \"$SSTATEDIR\",g" \
+            -i conf/local.conf
+    fi
 
     generated_config=1
 fi
